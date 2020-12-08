@@ -13,7 +13,8 @@ root.Name = "quRoot"
 
 game:service'RunService'.RenderStepped:Connect(function()
     if not game:service'CoreGui':FindFirstChild("DevConsoleMaster") then return end
-    local devConsoleUI = game:service'CoreGui'.DevConsoleMaster.DevConsoleWindow.DevConsoleUI
+    local devConsoleUI = game:service'CoreGui'.DevConsoleMaster.DevConsoleWindow:FindFirstChild("DevConsoleUI")
+    if not devConsoleUI then return end
     local mainView = devConsoleUI:FindFirstChild("MainView")
     if mainView then
         local clientLog = mainView:FindFirstChild("ClientLog")
