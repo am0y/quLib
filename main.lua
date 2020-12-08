@@ -1,5 +1,5 @@
 -- utils
-function notification(cnf)
+local function notification(cnf)
 	game:service'StarterGui':SetCore("SendNotification",cnf)
 end
 
@@ -11,37 +11,28 @@ print("quLib -> loaded")
 local root = Instance.new("Folder", game:service'CoreGui')
 root.Name = "quRoot"
 
-game:service'RunService'.RenderStepped:Connect(function()
-    if not game:service'CoreGui':FindFirstChild("DevConsoleMaster") then return end
-    local devConsoleUI = game:service'CoreGui'.DevConsoleMaster.DevConsoleWindow:FindFirstChild("DevConsoleUI")
-    if not devConsoleUI then return end
-    local mainView = devConsoleUI:FindFirstChild("MainView")
-    if mainView then
-        local clientLog = mainView:FindFirstChild("ClientLog")
-        for _,log in pairs(clientLog:GetChildren()) do
-            if (log:IsA("Frame") and log.Name ~= "WindowingPadding") then
-                local msg = log:FindFirstChild("msg")
-                if msg then
-                    local pattern = "QU|%d%d%d,%d%d%d,%d%d%d|"
-                    local find0,find1 = string.find(msg.Text, pattern)
+local devConsoleWindow_DescendantAdded = function(descendant)
+    local msg = descendant:FindFirstChild("msg")
+    if msg then
+        local pattern = "QU|%d%d%d,%d%d%d,%d%d%d|"
+        local find0,find1 = string.find(msg.Text, pattern)
                     
-                    if (find0 and find1) then
-                        local foundPattern = string.sub(msg.Text, find0, find1)
-                        local r = tonumber(string.sub(foundPattern, 4,6))
-                        local g = tonumber(string.sub(foundPattern, 8,10))
-                        local b = tonumber(string.sub(foundPattern, 12,14))
-                        
-                        local stringBuilder = ""
-                        stringBuilder = stringBuilder..string.sub(msg.Text, 1, find0-1)
-                        stringBuilder = stringBuilder..string.sub(msg.Text, find1+1, #msg.Text)
-                        msg.Text = stringBuilder
-                        msg.TextColor3 = Color3.fromRGB(r,g,b)
-                    end
-                end
-            end
+        if (find0 and find1) then
+            local foundPattern = string.sub(msg.Text, find0, find1)
+            local r = tonumber(string.sub(foundPattern, 4,6))
+            local g = tonumber(string.sub(foundPattern, 8,10))
+            local b = tonumber(string.sub(foundPattern, 12,14))
+            
+            local stringBuilder = ""
+            stringBuilder = stringBuilder..string.sub(msg.Text, 1, find0-1)
+            stringBuilder = stringBuilder..string.sub(msg.Text, find1+1, #msg.Text)
+            msg.Text = stringBuilder
+            msg.TextColor3 = Color3.fromRGB(r,g,b)
         end
     end
-end)
+end
+while not game:service'CoreGui':FindFirstChild("DevConsoleMaster") do game:service'RunService'.RenderStepped:Wait() end
+game:service'CoreGui'.DevConsoleMaster.DevConsoleWindow.DescendantAdded:Connect(devConsoleWindow_DescendantAdded)
 
 -- table
 local qu = {}
