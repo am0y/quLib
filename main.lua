@@ -1,3 +1,5 @@
+--loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/am0y/quLib/main/main.lua"))()
+
 assert(hookfunction, "Your exploit does not support quLib.")
 assert(getgenv, "Your exploit does not support quLib.")
 assert(getrenv, "Your exploit does not support quLib.")
@@ -113,15 +115,23 @@ game:service'CoreGui'.DevConsoleMaster.DevConsoleWindow.DescendantAdded:Connect(
 
 -- table
 local qu = {}
-local qu_s = {}
+
+local qu_s = {} -- services
 local qu_s_mt = {}
 function qu_s_mt.__index(t,k)
     return game:service(k)
 end
 setmetatable(qu_s, qu_s_mt)
-
 function qu:s()
     return qu_s
+end
+
+function qu:v3()
+    return Vector3
+end
+
+function qu:c3()
+    return Color3
 end
 
 function qu:rand(n)
