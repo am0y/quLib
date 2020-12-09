@@ -7,8 +7,9 @@ local function tickcos()
     return (math.cos(tick())+1)/2
 end
 
+local oldprint
 local function out(...)
-    print("|quLib|", ...)
+    oldprint("|quLib|", ...)
 end
 
 local function outf(fmt, ...)
@@ -21,6 +22,47 @@ if (game:service'CoreGui':FindFirstChild("quRoot") and qu) then error("quLib is 
 
 local root = Instance.new("Folder", game:service'CoreGui')
 root.Name = "quRoot"
+
+local olderror
+olderror = hookfunction(error, function(...)
+    local t = {...}
+    local fs = ""
+    for i,v in pairs(t) do
+        fs = fs..tostring(v)
+        fs = fs.." "        
+    end
+    if string.find(fs, "QU|%d%d%d,%d%d%d,%d%d%d|") then return olderror("quLib reserved string detected") end
+    if string.find(fs, "|quLib|") then return olderror("quLib reserved string detected") end
+
+    return olderror(...)
+end)
+
+oldprint = hookfunction(print, function(...)
+    local t = {...}
+    local fs = ""
+    for i,v in pairs(t) do
+        fs = fs..tostring(v)
+        fs = fs.." "        
+    end
+    if string.find(fs, "QU|%d%d%d,%d%d%d,%d%d%d|") then return olderror("quLib reserved string detected") end
+    if string.find(fs, "|quLib|") then return olderror("quLib reserved string detected") end
+
+    return oldprint(...)
+end)
+
+local oldwarn
+oldwarn = hookfunction(warn, function(...)
+    local t = {...}
+    local fs = ""
+    for i,v in pairs(t) do
+        fs = fs..tostring(v)
+        fs = fs.." "        
+    end
+    if string.find(fs, "QU|%d%d%d,%d%d%d,%d%d%d|") then return olderror("quLib reserved string detected") end
+    if string.find(fs, "|quLib|") then return olderror("quLib reserved string detected") end
+
+    return oldwarn(...)
+end)
 
 local devConsoleWindow_DescendantAdded = function(descendant)
     local msg = descendant:FindFirstChild("msg")
@@ -73,6 +115,16 @@ function qu:s()
     return qu_s
 end
 
+function qu:rand(n)
+    if (not n or type(n) ~= "number") then n = 0 end
+    local maxrand = 10000000
+    local rets = {}
+    for i=0,n do
+        table.insert(rets, math.random(maxrand)/maxrand)
+    end
+    return unpack(rets)
+end
+
 function qu:wait()
     return game:service'RunService'.RenderStepped:Wait()
 end
@@ -102,7 +154,7 @@ function qu:printf(fmt, ...)
 end
 
 function qu:cprintf(R,G,B, fmt, ...)
-    return print(string.format(("QU|%03d,%03d,%03d|"):format(R, G, B)..fmt, ...))
+    return oldprint(string.format(("QU|%03d,%03d,%03d|"):format(R, G, B)..fmt, ...))
 end
 
 function qu:warnf(fmt, ...)
@@ -114,7 +166,7 @@ function qu:errorf(fmt, ...)
 end
 
 function qu:infof(fmt, ...)
-    return print(string.format(("QU|%03d,%03d,%03d|"):format(0, 162, 255)..fmt, ...))
+    return oldprint(string.format(("QU|%03d,%03d,%03d|"):format(0, 162, 255)..fmt, ...))
 end
 
 function qu:assertf(condition, fmt, ...)
