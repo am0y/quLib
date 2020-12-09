@@ -73,7 +73,7 @@ function qu:s()
     return qu_s
 end
 
-function qu:tick()
+function qu:wait()
     return game:service'RunService'.RenderStepped:Wait()
 end
 
@@ -133,7 +133,7 @@ function qu:waituntil(condf)
     return tick()-start
 end
 
-function qu:waitnticks(n)
+function qu:waitn(n)
     local start = tick()
     local cnt = 0
     while cnt < n do game:service'RunService'.RenderStepped:Wait() cnt = cnt + 1 end
