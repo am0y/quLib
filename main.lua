@@ -1,3 +1,7 @@
+assert(hookfunction, "Your exploit does not support quLib.")
+assert(getgenv, "Your exploit does not support quLib.")
+assert(getrenv, "Your exploit does not support quLib.")
+
 -- utils
 local function notification(cnf)
 	game:service'StarterGui':SetCore("SendNotification",cnf)
@@ -36,6 +40,7 @@ olderror = hookfunction(error, function(...)
 
     return olderror(...)
 end)
+getrenv().error = error
 
 oldprint = hookfunction(print, function(...)
     local t = {...}
@@ -49,6 +54,7 @@ oldprint = hookfunction(print, function(...)
 
     return oldprint(...)
 end)
+getrenv().print = print
 
 local oldwarn
 oldwarn = hookfunction(warn, function(...)
@@ -63,6 +69,7 @@ oldwarn = hookfunction(warn, function(...)
 
     return oldwarn(...)
 end)
+getrenv().warn = warn
 
 local devConsoleWindow_DescendantAdded = function(descendant)
     local msg = descendant:FindFirstChild("msg")
