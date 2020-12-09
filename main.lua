@@ -82,6 +82,7 @@ local devConsoleWindow_DescendantAdded = function(descendant)
                 stringBuilder = stringBuilder..string.sub(msg.Text, find1+1, #msg.Text)
                 msg.Text = stringBuilder
                 msg.TextColor3 = Color3.fromRGB(r,g,b)
+		return
             end
         end
 
@@ -95,6 +96,7 @@ local devConsoleWindow_DescendantAdded = function(descendant)
                         msg.TextColor3 = Color3.fromHSV(tickcos(), 1, 1)
                     end
                 end)  
+		return
             end                      
         end
     end
