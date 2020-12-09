@@ -3,10 +3,21 @@ local function notification(cnf)
 	game:service'StarterGui':SetCore("SendNotification",cnf)
 end
 
+local function tickcos()
+    return (math.cos(tick())+1)/2
+end
+
+local function out(...)
+    print("|quLib|", ...)
+end
+
+local function outf(fmt, ...)
+    out(fmt:format(...))
+end
+
 -- init
 while not game.IsLoaded do game:service'RunService'.RenderStepped:Wait() end
 if (game:service'CoreGui':FindFirstChild("quRoot") and qu) then error("quLib is already loaded.") end
-print("quLib -> loaded")
 
 local root = Instance.new("Folder", game:service'CoreGui')
 root.Name = "quRoot"
@@ -14,20 +25,35 @@ root.Name = "quRoot"
 local devConsoleWindow_DescendantAdded = function(descendant)
     local msg = descendant:FindFirstChild("msg")
     if msg then
-        local pattern = "QU|%d%d%d,%d%d%d,%d%d%d|"
-        local find0,find1 = string.find(msg.Text, pattern)
-                    
-        if (find0 and find1) then
-            local foundPattern = string.sub(msg.Text, find0, find1)
-            local r = tonumber(string.sub(foundPattern, 4,6))
-            local g = tonumber(string.sub(foundPattern, 8,10))
-            local b = tonumber(string.sub(foundPattern, 12,14))
-            
-            local stringBuilder = ""
-            stringBuilder = stringBuilder..string.sub(msg.Text, 1, find0-1)
-            stringBuilder = stringBuilder..string.sub(msg.Text, find1+1, #msg.Text)
-            msg.Text = stringBuilder
-            msg.TextColor3 = Color3.fromRGB(r,g,b)
+        do -- cprintf
+            local pattern = "QU|%d%d%d,%d%d%d,%d%d%d|"
+            local find0,find1 = string.find(msg.Text, pattern)
+
+            if (find0 and find1) then
+                local foundPattern = string.sub(msg.Text, find0, find1)
+                local r = tonumber(string.sub(foundPattern, 4,6))
+                local g = tonumber(string.sub(foundPattern, 8,10))
+                local b = tonumber(string.sub(foundPattern, 12,14))
+
+                local stringBuilder = ""
+                stringBuilder = stringBuilder..string.sub(msg.Text, 1, find0-1)
+                stringBuilder = stringBuilder..string.sub(msg.Text, find1+1, #msg.Text)
+                msg.Text = stringBuilder
+                msg.TextColor3 = Color3.fromRGB(r,g,b)
+            end
+        end
+
+        do -- rainbow
+            local pattern = "|quLib|"
+            local find0,find1 = string.find(msg.Text, pattern)
+            if (find0 and find1) then                
+                spawn(function() 
+                    while game:service'RunService'.RenderStepped:Wait() do
+                        if not msg then break end
+                        msg.TextColor3 = Color3.fromHSV(tickcos(), 1, 1)
+                    end
+                end)  
+            end                      
         end
     end
 end
@@ -36,60 +62,34 @@ game:service'CoreGui'.DevConsoleMaster.DevConsoleWindow.DescendantAdded:Connect(
 
 -- table
 local qu = {}
+local qu_s = {}
+local qu_s_mt = {}
+function qu_s_mt.__index(t,k)
+    return game:service(k)
+end
+setmetatable(qu_s, qu_s_mt)
 
-function qu:this()
-    return qu
+function qu:s()
+    return qu_s
 end
 
 function qu:tick()
     return game:service'RunService'.RenderStepped:Wait()
 end
 
-function qu:service(...)
-    return game:service(...)
-end
-
-function qu:players()
-    return game:service'Players'
-end
-
-function qu:replicatedStorage()
-    return game:service'ReplicatedStorage'
-end
-
-function qu:coreGui()
-    return game:service'CoreGui'
-end
-
-function qu:starterGui()
-    return game:service'StarterGui'
-end
-
-function qu:lighting()
-    return game:service'Lighting'
-end
-
-function qu:testService()
-    return game:service'TestService'
-end
-
-function qu:runService()
-    return game:service'RunService'
-end
-
-function qu:getPlayers()
+function qu:plrs()
     return game:service'Players':GetPlayers()
 end
 
-function qu:localPlayer()
+function qu:lplr()
     return game:service'Players'.LocalPlayer
 end
 
-function qu:localChar()
+function qu:lchar()
     return game:service'Players'.LocalPlayer.Character
 end
 
-function qu:localHum()
+function qu:lhum()
     return game:service'Players'.LocalPlayer.Character.Humanoid
 end
 
@@ -98,7 +98,7 @@ function qu:notify(title, text)
 end
 
 function qu:printf(fmt, ...)
-    return print(string.format(fmt, ...))
+    return print(fmt:format(...))
 end
 
 function qu:cprintf(R,G,B, fmt, ...)
@@ -106,11 +106,11 @@ function qu:cprintf(R,G,B, fmt, ...)
 end
 
 function qu:warnf(fmt, ...)
-    return warn(string.format(fmt, ...))
+    return warn(fmt:format(...))
 end
 
 function qu:errorf(fmt, ...)
-    return error(string.format(fmt, ...))
+    return error(fmt:format(...))
 end
 
 function qu:infof(fmt, ...)
@@ -118,19 +118,29 @@ function qu:infof(fmt, ...)
 end
 
 function qu:assertf(condition, fmt, ...)
-    return assert(condition, string.format(fmt, ...))
+    return assert(condition, fmt:format(...))
 end
 
-function qu:iNew(className, properties) 
+function qu:inew(className, properties) 
     local instance = Instance.new(className)
     for n,v in pairs(properties) do instance[n] = v end
     return instance
 end
 
-function qu:waitUntil(condf)
+function qu:waituntil(condf)
     local start = tick()
     while not condf() do game:service'RunService'.RenderStepped:Wait() end
     return tick()-start
 end
 
+function qu:waitnticks(n)
+    local start = tick()
+    local cnt = 0
+    while cnt < n do game:service'RunService'.RenderStepped:Wait() cnt = cnt + 1 end
+    return tick()-start
+end
+
 getgenv()["qu"] = qu
+
+out("loaded")
+out("warning: quLib is not finished, so if you used it to make a script, expect your script to break when an update happens.")
